@@ -1,10 +1,3 @@
-/* 
- * File:   main.cpp
- * Author: huxu
- *
- * Created on 2012年11月13日, 下午6:37
- */
-
 #include <cstdlib>
 #include <stdio.h>
 #include <iostream>
@@ -14,8 +7,8 @@ int start;
 char Edge[100][100];
 int temp1, temp2;
 char temp3;
-int tempvertex[100], vertex[100], length[100];
-int route[100][100];
+int tempvertex[100], vertex[100], length[100], rank[100];
+int route[100][100], forkend[100][100];
 bool end, havevertex;
 int count1, count2, count3, NumofSon;
 
@@ -39,7 +32,7 @@ void search(int m, int o, int p) {
                     temp1 = vertex[i];
                     NumofSon++;
                 } else if (NumofSon == 1) {
-                    temp2 = vertex[i];
+                    forkend[o][p] = vertex[i];
                     NumofSon++;
                 }
             }
@@ -53,12 +46,11 @@ void search(int m, int o, int p) {
         } else if (NumofSon == 2) {
             p++;
             search(temp1, o, p);
-            for (int k = 0; k <= p; k++) {
-                route[o + 1][k] = route[o][k];
-            }
             count2++;
-            o++;
-            search(temp2, o, p);
+            for (int k = 0; k < p; k++) {
+                route[count2][k] = route[o][k];
+            }
+            search(forkend[o][p - 1], count2, p);
         }
     }
 }
@@ -86,20 +78,40 @@ int main(int argc, char** argv) {
             count3++;
         }
     }
-
-    for(int i = 0; i < count3; i++){
-        cout << vertex[i];
-    }
-    
-    search(start, 0, 0);
+    search(start, count2, 0);
 
     cout << "CC=" << count2 + 1 << endl;
     for (int i = 0; i <= count2; i++) {
-        for (int j = 0; j < length[count2]; j++) {
-            cout << route[i][j] << ',';
-        }
-        cout << route[i][length[count2]] << endl;
+        rank[i] = i;
     }
+    for (int i = 0; i <= count2; i++) {
+        for (int j = i; j <= count2; j++) {
+            if (length[rank[i]] > length[rank[j]]) {
+                temp2 = rank[i];
+                rank[i] = rank[j];
+                rank[j] = temp2;
+            } else if (length[rank[i]] == length[rank[j]]) {
+                for (int k = 0; k <= length[rank[j]]; k++) {
+                    if (route[rank[i]][k] > route[rank[j]][k]) {
+                        temp2 = rank[i];
+                        rank[i] = rank[j];
+                        rank[j] = temp2;
+                    }
+                }
+            }
+        }
+    }
+    for (int i = 0; i <= count2 - 1; i++) {
+        for (int j = 0; j < length[rank[i]]; j++) {
+            cout << route[rank[i]][j] << ',';
+        }
+        cout << route[rank[i]][length[rank[i]]] << endl;
+    }
+    
+    for (int j = 0; j < length[rank[count2]]; j++) {
+            cout << route[rank[count2]][j] << ',';
+        }
+        cout << route[rank[count2]][length[rank[count2]]];
     return 0;
 }
 
