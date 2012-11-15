@@ -8,8 +8,8 @@ char Edge[100][100];
 int temp1, temp2;
 char temp3;
 int tempvertex[100], vertex[100], length[100], rank[100];
-int route[100][100], forkend[100][100];
-bool end, havevertex;
+int route[100][100], forkend[100][100][2];
+bool end, havevertex, beSearched[100][100], pass[100];
 int count1, count2, count3, NumofSon;
 
 void search(int m, int o, int p) {
@@ -29,10 +29,10 @@ void search(int m, int o, int p) {
         for (int i = 0; i < count3; i++) {
             if (Edge[m][vertex[i]] == 'T' || Edge[m][vertex[i]] == 'F' || Edge[m][vertex[i]] == 'N') {
                 if (NumofSon == 0) {
-                    temp1 = vertex[i];
+                    forkend[o][p][0] = vertex[i];
                     NumofSon++;
                 } else if (NumofSon == 1) {
-                    forkend[o][p] = vertex[i];
+                    forkend[o][p][1] = vertex[i];
                     NumofSon++;
                 }
             }
@@ -42,25 +42,38 @@ void search(int m, int o, int p) {
             return;
         } else if (NumofSon == 1) {
             p++;
-            search(temp1, o, p);
+            search(forkend[o][p - 1][0], o, p);
         } else if (NumofSon == 2) {
+            if(Edge[m][forkend[o][p][0]] == 'F'){
             p++;
-            search(temp1, o, p);
+            search(forkend[o][p - 1][0], o, p);
             count2++;
             for (int k = 0; k < p; k++) {
                 route[count2][k] = route[o][k];
             }
-            search(forkend[o][p - 1], count2, p);
+            search(forkend[o][p - 1][1], count2, p);
+        }else if(Edge[m][forkend[o][p][0]] == 'T'){
+            p++;
+            search(forkend[o][p - 1][1], o, p);
+            count2++;
+            for (int k = 0; k < p; k++) {
+                route[count2][k] = route[o][k];
+            }
+            search(forkend[o][p - 1][0], count2, p);
+        }
         }
     }
 }
 
 int main(int argc, char** argv) {
-
+    for (int i = 0; i < 100; i++) {
+        pass[i] = true;
+    }
     scanf("%d", &start);
     count1 = 0, count2 = 0;
     while (scanf("%d->%d,%c", &temp1, &temp2, &temp3)) {
         Edge[temp1][temp2] = temp3;
+        beSearched[temp1][temp2] = false;
         tempvertex[count1] = temp2;
         count1++;
     }
@@ -80,9 +93,21 @@ int main(int argc, char** argv) {
     }
     search(start, count2, 0);
 
-    cout << "CC=" << count2 + 1 << endl;
+    count3 = 0;
     for (int i = 0; i <= count2; i++) {
         rank[i] = i;
+    }
+    for(int i = 0; i <= count2; i++){
+        for(int j = 0; j < length[i]; j++){
+            if(!beSearched[route[i][j]][route[i][j + 1]]){
+                beSearched[route[i][j]][route[i][j + 1]] = true;
+                pass[i] = false;
+            }
+        }
+    }
+    for(int i = 0; i < 100; i++){
+        if(pass[i] == false)
+            count3++;
     }
     for (int i = 0; i <= count2; i++) {
         for (int j = i; j <= count2; j++) {
@@ -101,17 +126,18 @@ int main(int argc, char** argv) {
             }
         }
     }
-    for (int i = 0; i <= count2 - 1; i++) {
-        for (int j = 0; j < length[rank[i]]; j++) {
-            cout << route[rank[i]][j] << ',';
+    cout << "CC=" << count3 << endl;
+    for (int i = 0; i <= count2; i++) {
+        if(pass[rank[i]])
+            continue;
+        else{
+            for (int j = 0; j < length[rank[i]]; j++) {
+                cout << route[rank[i]][j] << ',';
+            }
+            cout << route[rank[i]][length[rank[i]]] << endl;
         }
-        cout << route[rank[i]][length[rank[i]]] << endl;
     }
     
-    for (int j = 0; j < length[rank[count2]]; j++) {
-            cout << route[rank[count2]][j] << ',';
-        }
-        cout << route[rank[count2]][length[rank[count2]]];
     return 0;
 }
 
