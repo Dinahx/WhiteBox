@@ -121,6 +121,7 @@ int main(int argc, char** argv) {
                         temp2 = rank[i];
                         rank[i] = rank[j];
                         rank[j] = temp2;
+                        break;
                     }
                 }
             }
