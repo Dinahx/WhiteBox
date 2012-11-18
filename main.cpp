@@ -117,7 +117,9 @@ int main(int argc, char** argv) {
                 rank[j] = temp2;
             } else if (length[rank[i]] == length[rank[j]]) {
                 for (int k = 0; k <= length[rank[j]]; k++) {
-                    if (route[rank[i]][k] > route[rank[j]][k]) {
+                    if(route[rank[i]][k] < route[rank[j]][k])
+                        break;
+                    else if (route[rank[i]][k] > route[rank[j]][k]) {
                         temp2 = rank[i];
                         rank[i] = rank[j];
                         rank[j] = temp2;
@@ -127,6 +129,7 @@ int main(int argc, char** argv) {
             }
         }
     }
+    
     cout << "CC=" << count3 << endl;
     for (int i = 0; i <= count2; i++) {
         if(pass[rank[i]])
